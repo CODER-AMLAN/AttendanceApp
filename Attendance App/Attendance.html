@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance App</title>
+    <link rel="stylesheet" href="Attendance.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Class Attendance</h1>
+        <ul id="studentList">
+            <!-- Student list will be populated here by JavaScript -->
+        </ul>
+        <button onclick="generateAttendance()">Generate Attendance</button>
+        <h2>Total Present: <span id="totalPresent">0</span></h2>
+        <table id="attendanceTable">
+            <thead>
+                <tr>
+                    <th>Sl. No.</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- List of present students will be displayed here -->
+            </tbody>
+        </table>
+        <button onclick="downloadAttendance()">Download Attendance</button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<script src="Attendance.js"></script>
+</body>
+</html>
+
+<!-- const students = [
+            { slno: 1, name: "Piyush Kumar Agrawal" },
+            { slno: 2, name: "Anwesha Bal" },
+            { slno: 3, name: "Gourab Barik" },
+            { slno: 4, name: "Aditya Biswabandhu" },
+            { slno: 5, name: "Damodar Biswal" },
+            { slno: 6, name: "Supriya Subhalaxmi Das" },
+            { slno: 7, name: "Samridhi Das" },
+            { slno: 8, name: "Pratik Ranjan Dash" },
+            { slno: 9, name: "Ayusmita Das" },
+            { slno: 10, name: "Suchna Ghosh" },
+            { slno: 11, name: "Aditya Kumar Gupta" },
+            { slno: 12, name: "Ansh Gupta" },
+            { slno: 13, name: "Ayush Kumar Jha" },
+            { slno: 14, name: "Nikhil Kumar Jha" },
+            { slno: 15, name: "Ishita Jha" },
+            { slno: 16, name: "Rahul Kumar Jha" },
+            { slno: 17, name: "Jatin Kumar" },
+            { slno: 18, name: "Kriti Minz" },
+            { slno: 19, name: "Saswat Mishra" },
+            { slno: 20, name: "Abhipsa Mohapatra" },
+            { slno: 21, name: "Sayan Mondal" },
+            { slno: 22, name: "Shubham Kumar Mahto" },
+            { slno: 23, name: "Mili" },
+            { slno: 24, name: "Somesh Nanda" },
+            { slno: 25, name: "Amlan Anshuman Nayak" },
+            { slno: 26, name: "Smruti Ranjan Nayak" },
+            { slno: 27, name: "Kiran Nayak" },
+            { slno: 28, name: "Satyajit Nayak" },
+            { slno: 29, name: "Subham Nayak" },
+            { slno: 30, name: "Guru Prasad Panda" },
+            { slno: 31, name: "Debasmita Panda" },
+            { slno: 32, name: "Siddharth Panda" },
+            { slno: 33, name: "Sourav Panda" },
+            { slno: 34, name: "Suvam Panda" },
+            { slno: 35, name: "Baisakhi Rani Panigrahy" },
+            { slno: 36, name: "Srushti Swaroop Parida" },
+            { slno: 37, name: "Abhijeet Parida" },
+            { slno: 38, name: "Smruti Parija" },
+            { slno: 39, name: "Sourav Pati" },
+            { slno: 40, name: "Hemanth Patnana" },
+            { slno: 41, name: "Sai Prasad Patra" },
+            { slno: 42, name: "Padman Pattanaik" },
+            { slno: 43, name: "Ayush Raj" },
+            { slno: 44, name: "Sahil Raj" },
+            { slno: 45, name: "Rishabh Gupta" },
+            { slno: 46, name: "Durgesh Kumar Rout" },
+            { slno: 47, name: "Tushar Roy" },
+            { slno: 48, name: "Atish Kumar Sahoo" },
+            { slno: 49, name: "Rishit Kumar Sahoo" },
+            { slno: 50, name: "Sajhush Kumar Sahoo" },
+            { slno: 51, name: "Omm Prakash Sahoo" },
+            { slno: 52, name: "Priyanka Priyadarshini Sahoo" },
+            { slno: 53, name: "Sushree Sangeeta Sahoo" },
+            { slno: 54, name: "Rajendra Aryan Sahu" },
+            { slno: 55, name: "Ayush Kumar Sahu" },
+            { slno: 56, name: "Satwik Sahu" },
+            { slno: 57, name: "Subhashis Sahu" },
+            { slno: 58, name: "Arpit Kumar Samal" },
+            { slno: 59, name: "Anurag Senapati" },
+            { slno: 60, name: "Arpit Kumar Nath Sharma" },
+            { slno: 61, name: "Tushar Shaw" },
+            { slno: 62, name: "Samprati Shivang" },
+            { slno: 63, name: "Om Singh" },
+            { slno: 64, name: "Sushri Shomya Swain" },
+            { slno: 65, name: "Hitesh Swain" },
+            { slno: 66, name: "Chinmaya Swain" },
+        ]; -->
