@@ -5,85 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance App</title>
     <link rel="stylesheet" href="Attendance.css">
- <style>
-     body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-}
-
-.container {
-    max-width: 600px;
-    margin: 50px auto;
-    background: white;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h1, h2 {
-    text-align: center;
-}
-
-ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-li {
-    padding: 10px;
-    margin: 5px 0;
-    background-color: #e4e4e4;
-    cursor: pointer;
-}
-
-li:hover {
-    background-color: aquamarine;
-}
-
-li.present {
-    background-color: #8fbc8f;
-}
-
-button {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin: 20px 0;
-    background-color: #333;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #555;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-}
-
-th {
-    background-color: #333;
-    color: white;
-}
-
-#attendanceTable {
-    display: none; /* Hide the table initially */
-}
- </style>
+    <style>
+        /* Add styles here */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #e4e4e4;
+            cursor: pointer;
+        }
+        li:hover {
+            background-color: aquamarine;
+        }
+        li.present {
+            background-color: #8fbc8f;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 20px 0;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        #attendanceTable {
+            display: none;
+        }
+        .search-bar {
+            margin-bottom: 20px;
+            display: flex;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Class Attendance</h1>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search for a student...">
+        </div>
         <ul id="studentList">
             <!-- Student list will be populated here by JavaScript -->
         </ul>
@@ -103,10 +106,9 @@ th {
         <button onclick="downloadAttendance()">Download Attendance</button>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-<script src="Attendance.js"></script>
- <script>
- const students = [
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script>
+         const students = [
     { slno: 1, name: "Piyush Kumar Agrawal" },
     { slno: 2, name: "Anwesha Bal" },
     { slno: 3, name: "Gourab Barik" },
@@ -175,80 +177,89 @@ th {
     { slno: 66, name: "Chinmaya Swain" },
 ];
 
-window.onload = () => {
-    const studentList = document.getElementById('studentList');
-    students.forEach(student => {
-        const li = document.createElement('li');
-        li.textContent = `${student.slno}. ${student.name}`;
-        li.dataset.slno = student.slno; // Store serial number for later use
-        li.addEventListener('click', () => {
-            li.classList.toggle('present');
-        });
-        studentList.appendChild(li);
-    });
-};
+        window.onload = () => {
+            const studentList = document.getElementById('studentList');
+            students.forEach(student => {
+                const li = document.createElement('li');
+                li.textContent = `${student.slno}. ${student.name}`;
+                li.dataset.slno = student.slno; // Store serial number for later use
+                li.addEventListener('click', () => {
+                    li.classList.toggle('present');
+                });
+                studentList.appendChild(li);
+            });
 
-function generateAttendance() {
-    const presentStudents = document.querySelectorAll('.present');
-    const attendanceList = document.querySelector('#attendanceTable tbody');
-    const totalPresent = document.getElementById('totalPresent');
-    const attendanceTable = document.getElementById('attendanceTable');
+            // Add search functionality
+            document.getElementById('searchInput').addEventListener('input', filterStudentList);
+        };
 
-    attendanceList.innerHTML = '';
-    let count = 0;
+        function filterStudentList() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const studentItems = document.querySelectorAll('#studentList li');
+            studentItems.forEach(item => {
+                const studentName = item.textContent.toLowerCase();
+                if (studentName.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
 
-    presentStudents.forEach(student => {
-        const studentName = student.textContent.split('. ')[1];
-        const studentSlno = student.dataset.slno;
+        function generateAttendance() {
+            const presentStudents = document.querySelectorAll('.present');
+            const attendanceList = document.querySelector('#attendanceTable tbody');
+            const totalPresent = document.getElementById('totalPresent');
+            const attendanceTable = document.getElementById('attendanceTable');
 
-        // Create a row for each present student
-        const row = document.createElement('tr');
-        const cell1 = document.createElement('td');
-        const cell2 = document.createElement('td');
+            attendanceList.innerHTML = '';
+            let count = 0;
 
-        cell1.textContent = studentSlno; // Use original serial number
-        cell2.textContent = studentName;
+            presentStudents.forEach(student => {
+                const studentName = student.textContent.split('. ')[1];
+                const studentSlno = student.dataset.slno;
 
-        row.appendChild(cell1);
-        row.appendChild(cell2);
-        attendanceList.appendChild(row);
-        count++;
-    });
+                const row = document.createElement('tr');
+                const cell1 = document.createElement('td');
+                const cell2 = document.createElement('td');
 
-    totalPresent.textContent = count;
-    attendanceTable.style.display = 'table'; // Show the table
-}     
-async function downloadAttendance() {
-// Import jsPDF and autoTable
-const { jsPDF } = window.jspdf;
+                cell1.textContent = studentSlno;
+                cell2.textContent = studentName;
 
-// Create a new jsPDF instance
-const doc = new jsPDF();
+                row.appendChild(cell1);
+                row.appendChild(cell2);
+                attendanceList.appendChild(row);
+                count++;
+            });
 
-// Add title
-doc.setFontSize(16);
-doc.text("Class Attendance", 20, 20);
+            totalPresent.textContent = count;
+            attendanceTable.style.display = 'table';
+        }
 
-// Prepare table data
-const rows = document.querySelectorAll('#attendanceTable tbody tr');
-const tableData = Array.from(rows).map(row => {
-    const cells = row.querySelectorAll('td');
-    return [
-        cells[0].textContent.trim(), // Serial Number
-        cells[1].textContent.trim(), // Name
-    ];
-});
+        async function downloadAttendance() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
 
-// Add table using autoTable
-doc.autoTable({
-    head: [['Sl. No.', 'Name']],
-    body: tableData,
-    startY: 30,
-});
+            doc.setFontSize(16);
+            doc.text("Class Attendance", 20, 20);
 
-// Save the PDF
-doc.save("Attendance.pdf");
-}
- </script>
+            const rows = document.querySelectorAll('#attendanceTable tbody tr');
+            const tableData = Array.from(rows).map(row => {
+                const cells = row.querySelectorAll('td');
+                return [
+                    cells[0].textContent.trim(),
+                    cells[1].textContent.trim(),
+                ];
+            });
+
+            doc.autoTable({
+                head: [['Sl. No.', 'Name']],
+                body: tableData,
+                startY: 30,
+            });
+
+            doc.save("Attendance.pdf");
+        }
+    </script>
 </body>
 </html>
