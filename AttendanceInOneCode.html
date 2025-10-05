@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance App</title>
-    <link rel="stylesheet" href="Attendance.css">
     <style>
-        /* Add styles here */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -14,11 +12,12 @@
             padding: 0;
         }
         .container {
-            max-width: 600px;
+            max-width: 650px;
             margin: 50px auto;
             background: white;
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
         h1, h2 {
             text-align: center;
@@ -32,6 +31,7 @@
             margin: 5px 0;
             background-color: #e4e4e4;
             cursor: pointer;
+            border-radius: 4px;
         }
         li:hover {
             background-color: aquamarine;
@@ -39,15 +39,19 @@
         li.present {
             background-color: #8fbc8f;
         }
+        li.absent {
+            background-color: #ffb6b6;
+        }
         button {
             display: block;
             width: 100%;
             padding: 10px;
-            margin: 20px 0;
+            margin: 10px 0;
             background-color: #333;
             color: white;
             border: none;
             cursor: pointer;
+            border-radius: 4px;
         }
         button:hover {
             background-color: #555;
@@ -69,7 +73,7 @@
             display: none;
         }
         .search-bar {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
         }
         .search-bar input {
@@ -79,19 +83,45 @@
             border-radius: 4px;
             margin-right: 10px;
         }
+        .mode-toggle {
+            text-align: center;
+            margin: 15px 0;
+        }
+        .mode-toggle label {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Class Attendance</h1>
+
+        <div class="mode-toggle">
+            <label>
+                Mode: 
+                <select id="modeSelect" onchange="resetSelection()">
+                    <option value="present">Mark Present</option>
+                    <option value="absent">Mark Absent</option>
+                </select>
+            </label>
+        </div>
+
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="Search for a student...">
         </div>
+
         <ul id="studentList">
-            <!-- Student list will be populated here by JavaScript -->
+            <!-- Student list populated by JavaScript -->
         </ul>
+
         <button onclick="generateAttendance()">Generate Attendance</button>
-        <h2>Total Present: <span id="totalPresent">0</span></h2>
+
+        <div style="display:flex; gap:10px;">
+            <button onclick="generateOppositeList()">Generate Opposite List</button>
+        </div>
+
+        <h2>Total: <span id="totalPresent">0</span></h2>
+
         <table id="attendanceTable">
             <thead>
                 <tr>
@@ -99,115 +129,120 @@
                     <th>Name</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- List of present students will be displayed here -->
-            </tbody>
+            <tbody></tbody>
         </table>
+
         <button onclick="downloadAttendance()">Download Attendance</button>
     </div>
+
+    <!-- jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
     <script>
-         const students = [
-    { slno: 1, name: "Piyush Kumar Agrawal" },
-    { slno: 2, name: "Anwesha Bal" },
-    { slno: 3, name: "Gourab Barik" },
-    { slno: 4, name: "Aditya Biswabandhu" },
-    { slno: 5, name: "Damodar Biswal" },
-    { slno: 6, name: "Supriya Subhalaxmi Das" },
-    { slno: 7, name: "Samridhi Das" },
-    { slno: 8, name: "Pratik Ranjan Dash" },
-    { slno: 9, name: "Ayusmita Das" },
-    { slno: 10, name: "Suchna Ghosh" },
-    { slno: 11, name: "Aditya Kumar Gupta" },
-    { slno: 12, name: "Ansh Gupta" },
-    { slno: 13, name: "Ayush Kumar Jha" },
-    { slno: 14, name: "Nikhil Kumar Jha" },
-    { slno: 15, name: "Ishita Jha" },
-    { slno: 16, name: "Rahul Kumar Jha" },
-    { slno: 17, name: "Jatin Kumar" },
-    { slno: 18, name: "Kriti Minz" },
-    { slno: 19, name: "Saswat Mishra" },
-    { slno: 20, name: "Abhipsa Mohapatra" },
-    { slno: 21, name: "Sayan Mondal" },
-    { slno: 22, name: "Shubham Kumar Mahto" },
-    { slno: 23, name: "Mili" },
-    { slno: 24, name: "Somesh Nanda" },
-    { slno: 25, name: "Amlan Anshuman Nayak" },
-    { slno: 26, name: "Smruti Ranjan Nayak" },
-    { slno: 27, name: "Kiran Nayak" },
-    { slno: 28, name: "Satyajit Nayak" },
-    { slno: 29, name: "Subham Nayak" },
-    { slno: 30, name: "Guru Prasad Panda" },
-    { slno: 31, name: "Debasmita Panda" },
-    { slno: 32, name: "Siddharth Panda" },
-    { slno: 33, name: "Sourav Panda" },
-    { slno: 34, name: "Suvam Panda" },
-    { slno: 35, name: "Baisakhi Rani Panigrahy" },
-    { slno: 36, name: "Srushti Swaroop Parida" },
-    { slno: 37, name: "Abhijeet Parida" },
-    { slno: 38, name: "Smruti Parija" },
-    { slno: 39, name: "Sourav Pati" },
-    { slno: 40, name: "Hemanth Patnana" },
-    { slno: 41, name: "Sai Prasad Patra" },
-    { slno: 42, name: "Padman Pattanaik" },
-    { slno: 43, name: "Ayush Raj" },
-    { slno: 44, name: "Sahil Raj" },
-    { slno: 45, name: "Rishabh Gupta" },
-    { slno: 46, name: "Durgesh Kumar Rout" },
-    { slno: 47, name: "Tushar Roy" },
-    { slno: 48, name: "Atish Kumar Sahoo" },
-    { slno: 49, name: "Rishit Kumar Sahoo" },
-    { slno: 50, name: "Sajhush Kumar Sahoo" },
-    { slno: 51, name: "Omm Prakash Sahoo" },
-    { slno: 52, name: "Priyanka Priyadarshini Sahoo" },
-    { slno: 53, name: "Sushree Sangeeta Sahoo" },
-    { slno: 54, name: "Rajendra Aryan Sahu" },
-    { slno: 55, name: "Ayush Kumar Sahu" },
-    { slno: 56, name: "Satwik Sahu" },
-    { slno: 57, name: "Subhashis Sahu" },
-    { slno: 58, name: "Arpit Kumar Samal" },
-    { slno: 59, name: "Anurag Senapati" },
-    { slno: 60, name: "Arpit Kumar Nath Sharma" },
-    { slno: 61, name: "Tushar Shaw" },
-    { slno: 62, name: "Samprati Shivang" },
-    { slno: 63, name: "Om Singh" },
-    { slno: 64, name: "Sushri Shomya Swain" },
-    { slno: 65, name: "Hitesh Swain" },
-    { slno: 66, name: "Chinmaya Swain" },
-];
+        const students = [
+            { slno: 1, name: "Piyush Kumar Agrawal" },
+            { slno: 2, name: "Anwesha Bal" },
+            { slno: 3, name: "Gourab Barik" },
+            { slno: 4, name: "Aditya Biswabandhu" },
+            { slno: 5, name: "Damodar Biswal" },
+            { slno: 6, name: "Supriya Subhalaxmi Das" },
+            { slno: 7, name: "Samridhi Das" },
+            { slno: 8, name: "Pratik Ranjan Dash" },
+            { slno: 9, name: "Ayusmita Das" },
+            { slno: 10, name: "Suchna Ghosh" },
+            { slno: 11, name: "Aditya Kumar Gupta" },
+            { slno: 12, name: "Ansh Gupta" },
+            { slno: 13, name: "Ayush Kumar Jha" },
+            { slno: 14, name: "Nikhil Kumar Jha" },
+            { slno: 15, name: "Ishita Jha" },
+            { slno: 16, name: "Rahul Kumar Jha" },
+            { slno: 17, name: "Jatin Kumar" },
+            { slno: 18, name: "Kriti Minz" },
+            { slno: 19, name: "Saswat Mishra" },
+            { slno: 20, name: "Abhipsa Mohapatra" },
+            { slno: 21, name: "Sayan Mondal" },
+            { slno: 22, name: "Shubham Kumar Mahto" },
+            { slno: 23, name: "Mili" },
+            { slno: 24, name: "Somesh Nanda" },
+            { slno: 25, name: "Amlan Anshuman Nayak" },
+            { slno: 26, name: "Smruti Ranjan Nayak" },
+            { slno: 27, name: "Kiran Nayak" },
+            { slno: 28, name: "Satyajit Nayak" },
+            { slno: 29, name: "Subham Nayak" },
+            { slno: 30, name: "Guru Prasad Panda" },
+            { slno: 31, name: "Debasmita Panda" },
+            { slno: 32, name: "Siddharth Panda" },
+            { slno: 33, name: "Sourav Panda" },
+            { slno: 34, name: "Suvam Panda" },
+            { slno: 35, name: "Baisakhi Rani Panigrahy" },
+            { slno: 36, name: "Srushti Swaroop Parida" },
+            { slno: 37, name: "Abhijeet Parida" },
+            { slno: 38, name: "Smruti Parija" },
+            { slno: 39, name: "Sourav Pati" },
+            { slno: 40, name: "Hemanth Patnana" },
+            { slno: 41, name: "Sai Prasad Patra" },
+            { slno: 42, name: "Padman Pattanaik" },
+            { slno: 43, name: "Ayush Raj" },
+            { slno: 44, name: "Sahil Raj" },
+            { slno: 45, name: "Rishabh Gupta" },
+            { slno: 46, name: "Durgesh Kumar Rout" },
+            { slno: 47, name: "Tushar Roy" },
+            { slno: 48, name: "Atish Kumar Sahoo" },
+            { slno: 49, name: "Rishit Kumar Sahoo" },
+            { slno: 50, name: "Sajhush Kumar Sahoo" },
+            { slno: 51, name: "Omm Prakash Sahoo" },
+            { slno: 52, name: "Priyanka Priyadarshini Sahoo" },
+            { slno: 53, name: "Sushree Sangeeta Sahoo" },
+            { slno: 54, name: "Rajendra Aryan Sahu" },
+            { slno: 55, name: "Ayush Kumar Sahu" },
+            { slno: 56, name: "Satwik Sahu" },
+            { slno: 57, name: "Subhashis Sahu" },
+            { slno: 58, name: "Arpit Kumar Samal" },
+            { slno: 59, name: "Anurag Senapati" },
+            { slno: 60, name: "Arpit Kumar Nath Sharma" },
+            { slno: 61, name: "Tushar Shaw" },
+            { slno: 62, name: "Samprati Shivang" },
+            { slno: 63, name: "Om Singh" },
+            { slno: 64, name: "Sushri Shomya Swain" },
+            { slno: 65, name: "Hitesh Swain" },
+            { slno: 66, name: "Chinmaya Swain" },
+        ];
 
         window.onload = () => {
             const studentList = document.getElementById('studentList');
             students.forEach(student => {
                 const li = document.createElement('li');
                 li.textContent = `${student.slno}. ${student.name}`;
-                li.dataset.slno = student.slno; // Store serial number for later use
-                li.addEventListener('click', () => {
-                    li.classList.toggle('present');
-                });
+                li.dataset.slno = student.slno;
+                li.addEventListener('click', () => toggleSelection(li));
                 studentList.appendChild(li);
             });
 
-            // Add search functionality
             document.getElementById('searchInput').addEventListener('input', filterStudentList);
         };
 
-        function filterStudentList() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const studentItems = document.querySelectorAll('#studentList li');
-            studentItems.forEach(item => {
-                const studentName = item.textContent.toLowerCase();
-                if (studentName.includes(searchTerm)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
+        function toggleSelection(li) {
+            const mode = document.getElementById('modeSelect').value;
+            li.classList.toggle(mode);
+        }
+
+        function resetSelection() {
+            document.querySelectorAll('#studentList li').forEach(li => {
+                li.classList.remove('present', 'absent');
             });
         }
 
-        function generateAttendance() {
-            const presentStudents = document.querySelectorAll('.present');
+        function filterStudentList() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('#studentList li').forEach(item => {
+                item.style.display = item.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function generateAttendance(isOpposite = false) {
+            const mode = document.getElementById('modeSelect').value;
+            const selected = document.querySelectorAll('.' + (isOpposite ? (mode === 'present' ? 'absent' : 'present') : mode));
             const attendanceList = document.querySelector('#attendanceTable tbody');
             const totalPresent = document.getElementById('totalPresent');
             const attendanceTable = document.getElementById('attendanceTable');
@@ -215,19 +250,11 @@
             attendanceList.innerHTML = '';
             let count = 0;
 
-            presentStudents.forEach(student => {
-                const studentName = student.textContent.split('. ')[1];
-                const studentSlno = student.dataset.slno;
-
+            selected.forEach(student => {
+                const name = student.textContent.split('. ')[1];
+                const slno = student.dataset.slno;
                 const row = document.createElement('tr');
-                const cell1 = document.createElement('td');
-                const cell2 = document.createElement('td');
-
-                cell1.textContent = studentSlno;
-                cell2.textContent = studentName;
-
-                row.appendChild(cell1);
-                row.appendChild(cell2);
+                row.innerHTML = `<td>${slno}</td><td>${name}</td>`;
                 attendanceList.appendChild(row);
                 count++;
             });
@@ -236,20 +263,23 @@
             attendanceTable.style.display = 'table';
         }
 
+        function generateOppositeList() {
+            generateAttendance(true);
+        }
+
         async function downloadAttendance() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
+            const title = prompt("Enter PDF Title:", "Class Attendance") || "Class Attendance";
+
             doc.setFontSize(16);
-            doc.text("Class Attendance", 20, 20);
+            doc.text(title, 20, 20);
 
             const rows = document.querySelectorAll('#attendanceTable tbody tr');
             const tableData = Array.from(rows).map(row => {
                 const cells = row.querySelectorAll('td');
-                return [
-                    cells[0].textContent.trim(),
-                    cells[1].textContent.trim(),
-                ];
+                return [cells[0].textContent.trim(), cells[1].textContent.trim()];
             });
 
             doc.autoTable({
@@ -258,7 +288,7 @@
                 startY: 30,
             });
 
-            doc.save("Attendance.pdf");
+            doc.save(`${title.replace(/\s+/g, "_")}.pdf`);
         }
     </script>
 </body>
