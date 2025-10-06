@@ -240,9 +240,10 @@
             });
         }
 
+        // ✅ Fixed generateAttendance and generateOppositeList
         function generateAttendance(isOpposite = false) {
             const mode = document.getElementById('modeSelect').value;
-            const selected = document.querySelectorAll('.' + (isOpposite ? (mode === 'present' ? 'absent' : 'present') : mode));
+            const listItems = document.querySelectorAll('#studentList li');
             const attendanceList = document.querySelector('#attendanceTable tbody');
             const totalPresent = document.getElementById('totalPresent');
             const attendanceTable = document.getElementById('attendanceTable');
@@ -250,13 +251,18 @@
             attendanceList.innerHTML = '';
             let count = 0;
 
-            selected.forEach(student => {
-                const name = student.textContent.split('. ')[1];
-                const slno = student.dataset.slno;
-                const row = document.createElement('tr');
-                row.innerHTML = `<td>${slno}</td><td>${name}</td>`;
-                attendanceList.appendChild(row);
-                count++;
+            listItems.forEach(student => {
+                const hasMode = student.classList.contains(mode);
+                const shouldInclude = isOpposite ? !hasMode : hasMode;
+
+                if (shouldInclude) {
+                    const name = student.textContent.split('. ')[1];
+                    const slno = student.dataset.slno;
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${slno}</td><td>${name}</td>`;
+                    attendanceList.appendChild(row);
+                    count++;
+                }
             });
 
             totalPresent.textContent = count;
